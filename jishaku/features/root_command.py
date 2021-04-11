@@ -206,9 +206,8 @@ class RootCommand(Feature):
         return await ctx.send(f"Cancelled task {task.index}: `{task.ctx.command.qualified_name}`,"
                               f" invoked at {task.ctx.message.created_at.strftime('%Y-%m-%d %H:%M:%S')} UTC")
 
-
     @Feature.command(parent="jsk", name="sql")
-    async def jsk_sql(ctx,*,command):
+    async def jsk_sql(self, ctx, *, command):
         res = await self.bot.db.fetch(command)
         if len(res) == 0:
             return await ctx.send("Query finished successfully No results to display")
