@@ -24,6 +24,10 @@ from jishaku.meta import __version__
 from jishaku.modules import package_version
 from jishaku.paginators import PaginatorInterface
 
+from prettytable import PrettyTable
+import asyncpg
+
+
 try:
     import psutil
 except ImportError:
@@ -201,3 +205,31 @@ class RootCommand(Feature):
         task.task.cancel()
         return await ctx.send(f"Cancelled task {task.index}: `{task.ctx.command.qualified_name}`,"
                               f" invoked at {task.ctx.message.created_at.strftime('%Y-%m-%d %H:%M:%S')} UTC")
+
+
+    @Feature.command(parent="jsk", name="sql")
+    async def jsk_sql(ctx,*,command):
+        res = await self.bot.db.fetch(command)
+        if len(res) == 0:
+            return await ctx.send("Query finished successfully No results to display")
+        headers = list(res[0].keys())
+        table = PrettyTable()
+        table.field_names = headers
+        for record in res:
+            lst = list(record)
+            table.add_row(lst)
+        msg = table.get_string()
+        await ctx.send(f"```\n{msg}\n```")
+
+    @jsk_sql.error
+    async def sql_error_handling(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            error = error.original
+            if isinstance(error, asyncpg.exceptions.UndefinedTableError):
+                return await ctx.send("The table does not exists")
+            elif isinstance(error, asyncpg.exceptions.PostgresSyntaxError):
+                return await ctx.send(f"syntax error ```\n {error} ```")
+            else:
+                await ctx.send(error)
+        else:
+            await ctx.send(error)
