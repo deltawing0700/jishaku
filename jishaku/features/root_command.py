@@ -117,7 +117,7 @@ class RootCommand(Feature):
 
         # await ctx.send("\n".join(summary))
 
-        embed = discord.Embed(title="Jishaku", description=f"{\n}summary", color=discord.Color.dark_purple())
+        embed = discord.Embed(title="Jishaku", description="\n".join(summary), color=discord.Color.dark_purple())
 
         await ctx.send(embed=embed)
     # pylint: disable=no-member
